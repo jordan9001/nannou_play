@@ -10,8 +10,9 @@ fn main() {
         .run();
 }
 
-type Px = image::Rgba<u8>;
-type ImgBuf = image::ImageBuffer<Px, Vec<u8>>;
+type UI = u8;
+type Px = image::Rgba<UI>;
+type ImgBuf = image::ImageBuffer<Px, Vec<UI>>;
 
 struct Ball {
     pos: Vec2,
@@ -22,7 +23,7 @@ struct Ball {
     col: Px,
 }
 
-const EPS: f32 = 1.0;
+const EPS: f32 = 15.0;
 const WIDTH: u32 = 720;
 const HEIGHT: u32 = 720;
 const WIDTHHALF: i32 = (WIDTH / 2) as i32;
@@ -36,12 +37,12 @@ impl Ball {
             rad: 9.0,
             dst: Vec2::new(0.0, 0.0),
             dstdst: Vec2::new(0.0, 0.0),
-            spd: 150.0,
-            col: image::Rgba::<u8>([
-                random_range(210, 255),
-                random_range(210, 255),
-                random_range(210, 255),
-                255,
+            spd: random_range(96.0, 420.0),
+            col: image::Rgba::<UI>([
+                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
+                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
+                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
+                UI::MAX,
             ]),
         }
     }
@@ -78,18 +79,18 @@ impl Model {
 
 fn px2v3(px: &Px) -> Vec3 {
     Vec3::new(
-        px.0[0] as f32 / 255.0,
-        px.0[1] as f32 / 255.0,
-        px.0[2] as f32 / 255.0,
+        px.0[0] as f32 / (UI::MAX as f32),
+        px.0[1] as f32 / (UI::MAX as f32),
+        px.0[2] as f32 / (UI::MAX as f32),
     )
 }
 
 fn v32px(v: Vec3) -> Px {
-    image::Rgba::<u8>([
-        (v.x * 255.0) as u8,
-        (v.y * 255.0) as u8,
-        (v.z * 255.0) as u8,
-        255
+    image::Rgba::<UI>([
+        (v.x * (UI::MAX as f32)) as UI,
+        (v.y * (UI::MAX as f32)) as UI,
+        (v.z * (UI::MAX as f32)) as UI,
+        UI::MAX,
     ])
 }
 
@@ -152,22 +153,18 @@ fn step_trails(buf: &mut ImgBuf) {
                         continue;
                     }
 
-                    dirtymap[ny as usize][nx as usize] = true;
-
                     let nei = buf.get_pixel_mut(nx, ny);
 
                     let nv = px2v3(nei);
                     if nv.length_squared() < mag {
                         *nei = v32px(v);
-
-                        // need to mark this one as changed already, so we skip it later
-
+                        dirtymap[ny as usize][nx as usize] = true;
                     }
                 }
+            } else {
+                // darken
+                v *= DARKEN_MAG;
             }
-
-            // darken
-            v *= DARKEN_MAG;
 
             // restore
             let np = v32px(v);
@@ -244,12 +241,12 @@ fn view(app: &App, state: &Model, frame: Frame) {
         d.ellipse()
             .x_y(b.pos.x, b.pos.y)
             .radius(b.rad)
-            .color(color::rgb8(b.col.0[0], b.col.0[1], b.col.0[2]));
+            .color(color::rgb(b.col.0[0], b.col.0[1], b.col.0[2]));
     }
 
     d.to_frame(app, &frame).unwrap();
 
     // capture
-    let fp = app.project_path().unwrap().join(format!("{:04}.png", frame.nth()));
+    let fp = app.project_path().unwrap().join("out").join(format!("frame{:04}.png", frame.nth()));
     app.main_window().capture_frame(fp);
 }
