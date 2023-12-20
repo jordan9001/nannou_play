@@ -37,11 +37,11 @@ impl Ball {
             rad: 9.0,
             dst: Vec2::new(0.0, 0.0),
             dstdst: Vec2::new(0.0, 0.0),
-            spd: random_range(96.0, 420.0),
+            spd: random_range(69.0, 270.0),
             col: image::Rgba::<UI>([
-                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
-                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
-                random_range(((UI::MAX as f32) * 0.75) as UI, UI::MAX),
+                random_range(((UI::MAX as f32) * 0.84) as UI, UI::MAX),
+                random_range(((UI::MAX as f32) * 0.87) as UI, UI::MAX),
+                random_range(((UI::MAX as f32) * 0.90) as UI, UI::MAX),
                 UI::MAX,
             ]),
         }
@@ -106,8 +106,8 @@ fn rndv3(mag: f32) -> Vec3 {
 }
 
 const MAG_SPREAD: f32 = 0.03;
-const MODIFY_MAG: f32 = 0.03;
-const DARKEN_MAG: f32 = 0.81;
+const MODIFY_MAG: f32 = 0.01;
+const DARKEN_MAG: f32 = 0.96;
 
 fn step_trails(buf: &mut ImgBuf) {
     // spread ideas
